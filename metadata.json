@@ -1,0 +1,8 @@
+{
+  "name": "Beat the Heat",
+  "description": "Finds walking directions while highlighting air-conditioned spots like ATMs and banks along the route.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}
