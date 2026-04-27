@@ -3,7 +3,8 @@ Beat the heat by stopping at ATMs and Bank branches:
 
 https://vvarun97.github.io/beat-the-heat/
 
-Feature,Description
+Feature,Description:
+
 AC Radar,Real-time mapping of nearby ATMs and Bank branches.
 
 Heatmap Overlay,Visualizes high-temperature zones to avoid.
