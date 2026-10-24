@@ -119,10 +119,13 @@ export default function App() {
           };
         });
 
-        // Sort stops primarily by how early they appear along the path
+        // Sort stops by proximity to path
         allStops.sort((a, b) => a.distanceFromRoute - b.distanceFromRoute);
 
-        setStops(allStops);
+        // Cap to the top 40 most relevant stops to keep the map clean and responsive
+        const curatedStops = allStops.slice(0, 40);
+
+        setStops(curatedStops);
 
         // Run Gemini 3.8 Flash Route Analysis
         const leg = route.legs[0];
@@ -133,7 +136,7 @@ export default function App() {
           destination: leg.end_address || destinationText,
           routeDistance: leg.distance.text,
           routeDuration: leg.duration.text,
-          stops: allStops.slice(0, 10)
+          stops: curatedStops.slice(0, 10)
         }).then(res => {
           setAdvisorData(res);
           setAdvisorLoading(false);
