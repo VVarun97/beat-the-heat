@@ -108,25 +108,38 @@ export default function MapView({
     }
   }, [routeResult]);
 
-  // Clear and Render Stop Markers
+  // Smart Render Stop Markers (no DROP animation, preserve existing markers)
   useEffect(() => {
     if (!mapInstanceRef.current || !window.google || !window.google.maps) return;
 
-    // Clear old markers
+    if (!stops || stops.length === 0) {
+      // Clear markers if stops are emptied
+      markersRef.current.forEach(m => m.setMap(null));
+      markersRef.current = [];
+      return;
+    }
+
+    // Check if the stops list has actually changed by comparing IDs
+    const currentMarkerIds = markersRef.current.map(m => m.__stopId);
+    const newStopIds = stops.map(s => s.id);
+
+    const isSameList = currentMarkerIds.length === newStopIds.length &&
+      currentMarkerIds.every((id, idx) => id === newStopIds[idx]);
+
+    // If identical list of stops, do not rebuild markers at all!
+    if (isSameList) {
+      return;
+    }
+
+    // Otherwise clear and recreate smoothly without dropping animation
     markersRef.current.forEach(m => m.setMap(null));
     markersRef.current = [];
 
-    if (!stops || stops.length === 0) return;
-
-    const bounds = new window.google.maps.LatLngBounds();
-
-    stops.forEach((stop, idx) => {
+    stops.forEach((stop) => {
       const position = {
         lat: typeof stop.lat === 'function' ? stop.lat() : stop.lat,
         lng: typeof stop.lng === 'function' ? stop.lng() : stop.lng
       };
-
-      bounds.extend(position);
 
       const isAtm = stop.type === 'atm';
 
@@ -143,9 +156,10 @@ export default function MapView({
           url: iconUrl,
           scaledSize: new window.google.maps.Size(34, 42),
           anchor: new window.google.maps.Point(17, 42)
-        },
-        animation: window.google.maps.Animation.DROP
+        }
       });
+
+      marker.__stopId = stop.id;
 
       marker.addListener('click', () => {
         onMarkerClick(stop);

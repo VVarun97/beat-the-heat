@@ -274,6 +274,20 @@ export default function App() {
     bankCount: stops.filter(s => s.type === 'bank').length
   };
 
+  // Memoize marker click handler so it doesn't change on input typing
+  const handleMarkerClick = useCallback((stop) => {
+    setSelectedStop(stop);
+  }, []);
+
+  // Memoize filtered stops so reference doesn't change on input typing
+  const filteredStops = React.useMemo(() => {
+    return stops.filter(s => {
+      if (activeFilter === 'atm') return s.type === 'atm';
+      if (activeFilter === 'bank') return s.type === 'bank';
+      return true;
+    });
+  }, [stops, activeFilter]);
+
   return (
     <div className="app-container">
       {/* Top Header */}
@@ -354,7 +368,7 @@ export default function App() {
           <StopListPanel
             stops={stops}
             activeFilter={activeFilter}
-            onSelectStop={(stop) => setSelectedStop(stop)}
+            onSelectStop={handleMarkerClick}
             selectedStopId={selectedStop?.id}
           />
         </aside>
@@ -365,13 +379,9 @@ export default function App() {
             mapsLoaded={mapsLoaded}
             mapError={mapError}
             routeResult={routeResult}
-            stops={stops.filter(s => {
-              if (activeFilter === 'atm') return s.type === 'atm';
-              if (activeFilter === 'bank') return s.type === 'bank';
-              return true;
-            })}
+            stops={filteredStops}
             selectedStop={selectedStop}
-            onMarkerClick={(stop) => setSelectedStop(stop)}
+            onMarkerClick={handleMarkerClick}
           />
         </section>
       </main>
